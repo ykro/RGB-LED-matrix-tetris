@@ -1,0 +1,3 @@
+[submodule "node-pixel"]
+	path = node-pixel
+	url = https://github.com/ajfisher/node-pixel.git
