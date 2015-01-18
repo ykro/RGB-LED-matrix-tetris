@@ -13,10 +13,11 @@ var DOWN = 40;
 var LEFT = 37;  
 var RIGHT = 39;    
 
-var speed = 500;
-var timeOutToRenderLEDs = 15;
+var speed = 750;
+var timeOutToRenderLEDs = 60;
 var cols = 8, rows = 16;
 
+var joystick, button;
 /*
 //uncomment for browser support
 var width = 200, height = 400;
@@ -276,15 +277,27 @@ var step = function() {
 
 function init() {  
   /*
+  //uncomment for browser support
   context.fillStyle =  'white';
   context.fillRect(0, 0, width, height);
   */
+
   board = new Board(cols, rows);  
+
+  var clearBoardID = setInterval(function(){
+    var matrixSize = cols * rows;
+    for (var i = 0; i < matrixSize; i++) {
+      strip.pixel(i).color("#000");
+    }
+    clearInterval(clearBoardID);
+  }, timeOutToRenderLEDs);  
+
   newPiece();
 }
 
 function newGame() {
   init();
+  clearInterval(intervalId)
   intervalId = setInterval(step, speed);
 }
 
@@ -331,6 +344,34 @@ j5board.on("ready", function() {
     data: 6,
     length: length,
     board: this
+  });
+
+
+  joystick = new five.Joystick({
+    pins: ["A0", "A1"],
+    freq: 250
+  });
+
+  button = new five.Button("D8"); 
+
+  button.on("press", function() {
+    newGame();
+  }); 
+
+  joystick.on("axismove", function(err, timestamp) {
+    var k = -1;
+    if (this.fixed.y < 0.3)  {
+      k = UP;
+    } else if (this.fixed.y > 0.7)  {
+      k = DOWN;
+    } else if (this.fixed.x < 0.3)  {
+      k = LEFT;
+    } else if (this.fixed.x > 0.7)  {
+      k = RIGHT;            
+    }
+    if (k != -1) {
+      currentPlayingPiece.move(k);
+    }
   });
 
   newGame();  
